@@ -22,11 +22,11 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                username: 'postgres',
-                password: 'root',
-                database: 'cdecsic_mvp',
+                host: process.env.HOST,
+                port: Number(process.env.PORT),
+                username: process.env.USERNAME,
+                password: process.env.PASSWORD,
+                database: process.env.DATABASE,
                 entities: [user_1.User],
                 synchronize: true,
             }),

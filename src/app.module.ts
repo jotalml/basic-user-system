@@ -8,13 +8,14 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    //config connection params in environment varibales 
     TypeOrmModule.forRoot({ // Configuring TypeORM with database connections params
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'root',
-      database:  'cdecsic_mvp',
+      type: 'postgres', //database type 
+      host: process.env.HOST,
+      port: Number(process.env.PORT),
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+      database:  process.env.DATABASE,
       entities: [User],
       synchronize: true,
     }),
