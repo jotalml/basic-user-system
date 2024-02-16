@@ -26,6 +26,21 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Database Query Create Table
+
+```sql
+CREATE TABLE public."user" (
+	id serial GENERATED ALWAYS AS IDENTITY NOT NULL,
+	username varchar NOT NULL,
+	"password" varchar NOT NULL,
+	email varchar NOT NULL,
+	CONSTRAINT user_pk PRIMARY KEY (id),
+	CONSTRAINT user_unique UNIQUE (username),
+	CONSTRAINT user_unique_1 UNIQUE (email)
+);
+
+```
+
 ## Installation
 
 ```bash
