@@ -11,4 +11,5 @@ export declare class UserService {
     deleteUser(id: number): Promise<{
         message: string;
     }>;
+    getUserByEmailOrUsername(username: string): Promise<User>;
 }

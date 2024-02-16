@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PagedResponse } from 'src/models/entity/pagedResponse';
 import { User } from 'src/models/entity/user';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+
 
 @Injectable()
 export class UserService {
@@ -49,16 +51,25 @@ export class UserService {
             }
             return user;
         }catch(e){
-            throw new BadRequestException(e.detail);
+            throw new BadRequestException(e.detail || e.message);
         }
 
     }
 
     async createUser(user: User): Promise<User> {
         try{
+            const emailExist = await this.usersRepository.existsBy({email:user.email});
+            const usernameExist = await this.usersRepository.existsBy({username:user.username});
+                if(emailExist || usernameExist) throw new BadRequestException('User exist');
+                if(!(user.password.length > 8)) throw new BadRequestException('Your password must be more than 8 characters');
+
+            const salt = await bcrypt.genSalt();
+            const hashPassword = await bcrypt.hash(user.password, salt);
+            user.password = hashPassword;
+
             return this.usersRepository.save(user);
         }catch(e){
-            throw new BadRequestException(e.detail);
+            throw new BadRequestException(e.detail || e.message);
         }
         
     }
@@ -74,7 +85,7 @@ export class UserService {
 
             return await this.usersRepository.findOneBy({id: id});
         }catch(e){
-            throw new BadRequestException(e.detail);
+            throw new BadRequestException(e.detail || e.message);
         }
 
     }
@@ -89,10 +100,20 @@ export class UserService {
             this.usersRepository.delete({id: id});
 
             return {
-                message: `user ${user.username} has been deleted`
+                message: `User ${user.username} has been deleted`
             }
         }catch(e){
-            throw new BadRequestException(e.detail);
+            throw new BadRequestException(e.detail || e.message);
         }
     }
+
+    async getUserByEmailOrUsername(username: string): Promise<User> {
+        const user = await this.usersRepository.createQueryBuilder('user')
+            .where({username: username})
+            .orWhere({email: username})
+            .getOne();
+
+        return user;
+    }
+    
 }

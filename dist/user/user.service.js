@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const pagedResponse_1 = require("../models/entity/pagedResponse");
 const user_1 = require("../models/entity/user");
 const typeorm_2 = require("typeorm");
+const bcrypt = require("bcrypt");
 let UserService = class UserService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
@@ -53,15 +54,24 @@ let UserService = class UserService {
             return user;
         }
         catch (e) {
-            throw new common_1.BadRequestException(e.detail);
+            throw new common_1.BadRequestException(e.detail || e.message);
         }
     }
     async createUser(user) {
         try {
+            const emailExist = await this.usersRepository.existsBy({ email: user.email });
+            const usernameExist = await this.usersRepository.existsBy({ username: user.username });
+            if (emailExist || usernameExist)
+                throw new common_1.BadRequestException('User exist');
+            if (!(user.password.length > 8))
+                throw new common_1.BadRequestException('Your password must be more than 8 characters');
+            const salt = await bcrypt.genSalt();
+            const hashPassword = await bcrypt.hash(user.password, salt);
+            user.password = hashPassword;
             return this.usersRepository.save(user);
         }
         catch (e) {
-            throw new common_1.BadRequestException(e.detail);
+            throw new common_1.BadRequestException(e.detail || e.message);
         }
     }
     async updateUser(id, user) {
@@ -74,7 +84,7 @@ let UserService = class UserService {
             return await this.usersRepository.findOneBy({ id: id });
         }
         catch (e) {
-            throw new common_1.BadRequestException(e.detail);
+            throw new common_1.BadRequestException(e.detail || e.message);
         }
     }
     async deleteUser(id) {
@@ -85,12 +95,19 @@ let UserService = class UserService {
             }
             this.usersRepository.delete({ id: id });
             return {
-                message: `user ${user.username} has been deleted`
+                message: `User ${user.username} has been deleted`
             };
         }
         catch (e) {
-            throw new common_1.BadRequestException(e.detail);
+            throw new common_1.BadRequestException(e.detail || e.message);
         }
+    }
+    async getUserByEmailOrUsername(username) {
+        const user = await this.usersRepository.createQueryBuilder('user')
+            .where({ username: username })
+            .orWhere({ email: username })
+            .getOne();
+        return user;
     }
 };
 exports.UserService = UserService;

@@ -23,7 +23,6 @@ export class UserController {
     @Post() // Add new user
     async addNewUser(@Body() user: User): Promise<User> {
         return await this.userService.createUser(user);
-        
     }
 
     @Patch(':id') // Update user
@@ -34,10 +33,11 @@ export class UserController {
         return await this.userService.updateUser(id, user);
     }
 
-    @Delete(':id') // Get user by ID
+    @Delete(':id') // Delete user by ID
     async deleteUser(@Param('id') id: number) {
         return await this.userService.deleteUser(id);
     }
+    
 
     
 }
