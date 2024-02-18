@@ -66,5 +66,5 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 
 ## Swagger
-- Localhost - [Swagger Localhost](http://localhost:3000/api/docs)
+- Localhost - [Swagger Localhost](http://localhost:3000/api-docs)
 

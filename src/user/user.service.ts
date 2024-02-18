@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PagedResponse } from 'src/models/entity/pagedResponse';
+import { PagedResponse } from 'src/models/dto/pagedResponse';
 import { User } from 'src/models/entity/user';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -60,8 +60,8 @@ export class UserService {
         try{
             const emailExist = await this.usersRepository.existsBy({email:user.email});
             const usernameExist = await this.usersRepository.existsBy({username:user.username});
-                if(emailExist || usernameExist) throw new BadRequestException('User exist');
-                if(!(user.password.length > 8)) throw new BadRequestException('Your password must be more than 8 characters');
+            
+            if(emailExist || usernameExist) throw new BadRequestException('User exist');
 
             const salt = await bcrypt.genSalt();
             const hashPassword = await bcrypt.hash(user.password, salt);
