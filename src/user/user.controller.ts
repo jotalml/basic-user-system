@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { User } from 'src/models/entity/user';
 import { PagedResponse } from 'src/models/dto/pagedResponse';
 import { ApiAcceptedResponse, ApiCreatedResponse, ApiDefaultResponse, ApiOkResponse, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { RegisterDto } from 'src/models/dto/registerDto';
 
 @Controller('users')
 export class UserController {
@@ -29,7 +30,7 @@ export class UserController {
     @Post() // Add new user
     @ApiCreatedResponse({type: User})
     @UsePipes(ValidationPipe)
-    async addNewUser(@Body() user: User): Promise<User> {
+    async addNewUser(@Body() user: RegisterDto): Promise<User> {
         return await this.userService.createUser(user);
     }
 
@@ -38,7 +39,7 @@ export class UserController {
     @UsePipes(ValidationPipe)
     async updateUser(
         @Param('id') id: number,
-        @Body() user: User
+        @Body() user: RegisterDto
         ): Promise<User> {
         return await this.userService.updateUser(id, user);
     }

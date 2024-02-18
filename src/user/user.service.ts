@@ -4,6 +4,7 @@ import { PagedResponse } from 'src/models/dto/pagedResponse';
 import { User } from 'src/models/entity/user';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto } from 'src/models/dto/registerDto';
 
 
 @Injectable()
@@ -56,7 +57,7 @@ export class UserService {
 
     }
 
-    async createUser(user: User): Promise<User> {
+    async createUser(user: RegisterDto): Promise<User> {
         try{
             const emailExist = await this.usersRepository.existsBy({email:user.email});
             const usernameExist = await this.usersRepository.existsBy({username:user.username});
@@ -64,8 +65,7 @@ export class UserService {
             if(emailExist || usernameExist) throw new BadRequestException('User exist');
 
             const salt = await bcrypt.genSalt();
-            const hashPassword = await bcrypt.hash(user.password, salt);
-            user.password = hashPassword;
+            user.password = await bcrypt.hash(user.password, salt);
 
             return this.usersRepository.save(user);
         }catch(e){
@@ -74,12 +74,15 @@ export class UserService {
         
     }
 
-    async updateUser(id: number, user: User): Promise<User> {
+    async updateUser(id: number, user: RegisterDto): Promise<User> {
         try{
             const updatedUser = await this.usersRepository.findOneBy({id: id});
             if(!updatedUser){
                 throw new NotFoundException('User not found');
             }
+
+            const salt = await bcrypt.genSalt();
+            user.password = await bcrypt.hash(user.password, salt);
         
             await this.usersRepository.update(id, user);
 
