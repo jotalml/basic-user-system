@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Login } from 'src/models/dto/loginDto';
+import { LoginDto } from 'src/models/dto/loginDto';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
+import { Token } from 'src/models/dto/token';
 
 
 @Injectable()
@@ -12,11 +13,8 @@ export class AuthService {
     constructor(private readonly userService: UserService,
                 private readonly jwtService: JwtService){}
 
-    async validateUser(login: Login): Promise<string> {
+    async validateUser(login: LoginDto): Promise<Token> {
         try{
-
-            if(!(login.password.length > 8)) throw new BadRequestException('Your password must be more than 8 characters');
-
             const existingUser = await this.userService.getUserByEmailOrUsername(login.username);
         
             if(!existingUser) throw new BadRequestException(`Username: ${login.username} doesn't exist`);
@@ -34,11 +32,14 @@ export class AuthService {
                 expiresIn: '1h' 
             };
         
+            const token = new Token();
+            token.token = this.jwtService.sign(payload,options);
+
             //JWT token returns upon successful login
-            return this.jwtService.sign(payload,options);
+            return token;
 
         }catch(e){
-            throw new ExceptionsHandler(e.message || e.detail);
+            throw new BadRequestException(e.message || e.detail);
         }
     }
 }

@@ -2,13 +2,14 @@ import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post,
 import { UserService } from './user.service';
 import { User } from 'src/models/entity/user';
 import { PagedResponse } from 'src/models/dto/pagedResponse';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiAcceptedResponse, ApiCreatedResponse, ApiDefaultResponse, ApiOkResponse, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService){}
 
-    @Get() // Get user by ID
+    @Get() // Get All users by filter
+    @ApiOkResponse({type: PagedResponse})
     @ApiQuery({name:'page', required:false})
     @ApiQuery({name:'count', required:false})
     async getUsers(
@@ -20,17 +21,20 @@ export class UserController {
     }
 
     @Get(':id') // Get user by ID
+    @ApiOkResponse({type: User})
     async getUserById(@Param('id') id: number): Promise<User> {
         return await this.userService.getUserById(id);
     }
 
     @Post() // Add new user
+    @ApiCreatedResponse({type: User})
     @UsePipes(ValidationPipe)
     async addNewUser(@Body() user: User): Promise<User> {
         return await this.userService.createUser(user);
     }
 
     @Patch(':id') // Update user
+    @ApiOkResponse({type: User})
     @UsePipes(ValidationPipe)
     async updateUser(
         @Param('id') id: number,
