@@ -1,0 +1,6 @@
+# dependencies
+/node_modules
+/coverage
+/dist
+package-lock.json
+environment_dev.json
